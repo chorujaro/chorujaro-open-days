@@ -1,1 +1,209 @@
 
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CHORUJARO COFFEE | 開業準備</title>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f7f5f0;color:#393b34;font-family:sans-serif}
+header{background:#fff;padding:24px 20px 18px;border-bottom:1px solid #e8e4dc}
+.brand{font-size:12px;letter-spacing:3px;color:#858474}
+h1{font-size:21px;margin:9px 0 3px}
+.sub{font-size:12px;color:#999}
+main{max-width:650px;margin:auto;padding:18px}
+.panel{background:white;border:1px solid #ebe7df;border-radius:14px;padding:18px;margin-bottom:16px}
+.eyebrow{font-size:12px;color:#929080}
+.count{font-size:35px;font-weight:bold;margin:8px 0}
+.count small{font-size:14px;font-weight:normal}
+.date{font-size:13px;color:#888}
+nav{display:flex;gap:8px;margin-bottom:16px}
+nav button{flex:1;background:#eeeae2;color:#555}
+button{border:0;border-radius:9px;padding:12px 14px;background:#59614d;color:white;font-size:14px;cursor:pointer}
+button:disabled{opacity:.5}
+nav button.active{background:#59614d;color:white}
+input,select{width:100%;padding:12px;border:1px solid #ddd8ce;border-radius:8px;background:white;font-size:15px;margin:6px 0 12px}
+label{font-size:12px;color:#777}
+h2{font-size:16px;margin:0 0 14px}
+.task{display:flex;align-items:center;gap:10px;border-top:1px solid #eee;padding:13px 0}
+.task input{width:20px;height:20px;margin:0}
+.task-info{flex:1;min-width:0}
+.task-name{font-size:14px}
+.done{text-decoration:line-through;color:#aaa}
+.task-meta{font-size:11px;color:#999;margin-top:5px}
+.delete{background:transparent;color:#aaa;padding:7px}
+.primary{width:100%}
+.muted{font-size:12px;color:#999;line-height:1.7}
+.empty{text-align:center;color:#aaa;padding:20px 0;font-size:13px}
+.status{font-size:12px;color:#858474;margin-top:10px}
+footer{text-align:center;font-size:10px;color:#aaa;padding:20px}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand">CHORUJARO COFFEE</div>
+ <h1>開業準備ノート</h1>
+ <div class="sub">ふたりでつくる、お店のこれから。</div>
+</header>
+<main>
+ <section class="panel">
+  <div class="eyebrow">GRAND OPENING</div>
+  <div class="count"><span id="days">---</span><small> 日</small></div>
+  <div class="date">OPEN予定日：2027年3月21日</div>
+ </section>
+
+ <nav>
+  <button class="active" id="homeTab" onclick="showPage('home')">ホーム</button>
+  <button id="taskTab" onclick="showPage('tasks')">タスク</button>
+ </nav>
+
+ <section id="homePage">
+  <div class="panel">
+   <h2>これから取り組むこと</h2>
+   <div id="homeTasks" class="muted">読み込み中...</div>
+  </div>
+  <div class="panel">
+   <h2>準備の進み具合</h2>
+   <div id="progress">読み込み中...</div>
+  </div>
+ </section>
+
+ <section id="tasksPage" hidden>
+  <div class="panel">
+   <h2>新しいタスクを追加</h2>
+   <label>タスク名</label>
+   <input id="taskName" placeholder="例：メニュー表を作成する">
+   <label>担当者</label>
+   <select id="owner">
+    <option value="夫">夫</option>
+    <option value="妻">妻</option>
+    <option value="ふたり">ふたり</option>
+   </select>
+   <label>期限</label>
+   <input type="date" id="deadline">
+   <label>分類</label>
+   <select id="category">
+    <option value="店舗準備">店舗準備</option>
+    <option value="商品・メニュー">商品・メニュー</option>
+    <option value="手続き・届出">手続き・届出</option>
+    <option value="資金・経理">資金・経理</option>
+    <option value="広報・集客">広報・集客</option>
+    <option value="その他">その他</option>
+   </select>
+   <button class="primary" id="addButton" onclick="addTask()">タスクを追加する</button>
+  </div>
+  <div class="panel">
+   <h2>タスク一覧</h2>
+   <div id="taskList" class="muted">読み込み中...</div>
+  </div>
+ </section>
+ <div class="status" id="connection">接続準備中...</div>
+ <footer>CHORUJARO COFFEE</footer>
+</main>
+
+<script>
+// Firebaseの設定をここに貼り付けます
+const firebaseConfig = {
+  apiKey: "ここにAPIキー",
+  authDomain: "ここにAuthDomain",
+  projectId: "ここにProjectID",
+  storageBucket: "ここにStorageBucket",
+  messagingSenderId: "ここにMessagingSenderId",
+  appId: "ここにAppID"
+};
+
+let db;
+let tasks = [];
+
+function showPage(page){
+ document.getElementById('homePage').hidden=page!=='home';
+ document.getElementById('tasksPage').hidden=page!=='tasks';
+ document.getElementById('homeTab').classList.toggle('active',page==='home');
+ document.getElementById('taskTab').classList.toggle('active',page==='tasks');
+}
+
+function updateDays(){
+ const target=new Date('2027-03-21T00:00:00');
+ const today=new Date();
+ today.setHours(0,0,0,0);
+ document.getElementById('days').textContent=Math.ceil((target-today)/86400000);
+}
+updateDays();
+
+function render(){
+ const open=tasks.filter(t=>!t.done);
+ const completed=tasks.filter(t=>t.done);
+ document.getElementById('progress').textContent=
+  tasks.length ? `完了 ${completed.length} / ${tasks.length} 件（${Math.round(completed.length/tasks.length*100)}%）` : 'まずはタスクを登録してみましょう。';
+
+ document.getElementById('homeTasks').innerHTML=open.length
+ ? open.slice(0,5).map(t=>`<div class="task"><div class="task-info"><div class="task-name">${escapeHTML(t.name)}</div><div class="task-meta">${escapeHTML(t.owner)} ・ ${escapeHTML(t.deadline||'期限未設定')}</div></div></div>`).join('')
+ : '<div class="empty">未完了のタスクはありません</div>';
+
+ document.getElementById('taskList').innerHTML=tasks.length
+ ? tasks.map(t=>`<div class="task">
+ <input type="checkbox" ${t.done?'checked':''} onchange="toggleTask('${t.id}',this.checked)">
+ <div class="task-info">
+ <div class="task-name ${t.done?'done':''}">${escapeHTML(t.name)}</div>
+ <div class="task-meta">${escapeHTML(t.owner)} ・ ${escapeHTML(t.category)} ・ ${escapeHTML(t.deadline||'期限未設定')}</div>
+ </div>
+ <button class="delete" onclick="deleteTask('${t.id}')">削除</button>
+ </div>`).join('')
+ : '<div class="empty">タスクはまだありません</div>';
+}
+
+function escapeHTML(value){
+ return String(value||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function addTask(){
+ const name=document.getElementById('taskName').value.trim();
+ if(!name){alert('タスク名を入力してください');return;}
+ const button=document.getElementById('addButton');
+ button.disabled=true;
+ try{
+  await db.collection('tasks').add({
+   name,
+   owner:document.getElementById('owner').value,
+   deadline:document.getElementById('deadline').value,
+   category:document.getElementById('category').value,
+   done:false,
+   createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  });
+  document.getElementById('taskName').value='';
+  document.getElementById('deadline').value='';
+ }catch(e){alert('保存できませんでした。Firebaseの設定を確認してください。');}
+ button.disabled=false;
+}
+
+async function toggleTask(id,done){
+ try{await db.collection('tasks').doc(id).update({done});}
+ catch(e){alert('更新できませんでした');}
+}
+
+async function deleteTask(id){
+ if(!confirm('このタスクを削除しますか？'))return;
+ try{await db.collection('tasks').doc(id).delete();}
+ catch(e){alert('削除できませんでした');}
+}
+
+try{
+ firebase.initializeApp(firebaseConfig);
+ db=firebase.firestore();
+ db.collection('tasks').orderBy('createdAt','desc').onSnapshot(snapshot=>{
+  tasks=snapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
+  render();
+  document.getElementById('connection').textContent='データベースに接続しています';
+ },error=>{
+  document.getElementById('connection').textContent='接続エラー：Firebaseの設定・ルールを確認してください';
+ });
+}catch(e){
+ document.getElementById('connection').textContent='Firebase設定が必要です';
+}
+</script>
+</body>
+</html>
+
