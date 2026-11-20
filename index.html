@@ -48,6 +48,7 @@ footer{text-align:center;font-size:10px;color:#aaa;padding:20px}
  <div class="brand">CHORUJARO COFFEE</div>
  <h1>開業準備ノート</h1>
  <div class="sub">ふたりでつくる、お店のこれから。</div>
+ <button onclick="logout()" style="float:right">ログアウト</button>
 </header>
 <main>
  <section class="panel" id="loginPage">
@@ -203,6 +204,13 @@ async function deleteTask(id){
  catch(e){alert('削除できませんでした');}
 }
 async function login(){
+ async function logout(){
+  try {
+    await auth.signOut();
+  } catch(error) {
+    alert('ログアウトできませんでした');
+  }
+ }
  const email=document.getElementById('loginEmail').value.trim();
  const password=document.getElementById('loginPassword').value;
  const message=document.getElementById('loginMessage');
