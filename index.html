@@ -1,154 +1,235 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CHORUJARO COFFEE | 開業準備</title>
-
+<meta name="theme-color" content="#f7f5f0">
+<title>CHORUJARO COFFEE | 開業準備ノート</title>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-
 <style>
+:root{--bg:#f7f5f0;--paper:#fff;--ink:#393b34;--muted:#929080;--line:#ebe7df;--green:#59614d;--green-soft:#edf0e8;--sand:#f1eee7;--red:#a65c50;--gold:#a17d42}
 *{box-sizing:border-box}
-body{margin:0;background:#f7f5f0;color:#393b34;font-family:sans-serif}
-header{background:#fff;padding:24px 20px 18px;border-bottom:1px solid #e8e4dc}
-.brand{font-size:12px;letter-spacing:3px;color:#858474}
-h1{font-size:21px;margin:9px 0 3px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif}
+button,input,select,textarea{font:inherit}
+button{border:0;border-radius:10px;padding:12px 14px;background:var(--green);color:white;font-size:14px;cursor:pointer}
+button:disabled{opacity:.55;cursor:wait}
+header{background:var(--paper);padding:18px 18px 15px;border-bottom:1px solid var(--line);display:none}
+.header-inner,main{max-width:720px;margin:auto}
+.header-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{font-size:11px;letter-spacing:3px;color:#858474}
+.logout{background:var(--sand);color:#666;padding:8px 11px;font-size:12px}
+h1{font-size:21px;margin:10px 0 2px}
 .sub{font-size:12px;color:#999}
-main{max-width:650px;margin:auto;padding:18px}
-.panel{background:white;border:1px solid #ebe7df;border-radius:14px;padding:18px;margin-bottom:16px}
-.eyebrow{font-size:12px;color:#929080}
-.count{font-size:35px;font-weight:bold;margin:8px 0}
-.count small{font-size:14px;font-weight:normal}
-.date{font-size:13px;color:#888}
-nav{display:flex;gap:8px;margin-bottom:16px}
-nav button{flex:1;background:#eeeae2;color:#555}
-button{border:0;border-radius:9px;padding:12px 14px;background:#59614d;color:white;font-size:14px;cursor:pointer}
-button:disabled{opacity:.5}
-nav button.active{background:#59614d;color:white}
-input,select{width:100%;padding:12px;border:1px solid #ddd8ce;border-radius:8px;background:white;font-size:15px;margin:6px 0 12px}
-label{font-size:12px;color:#777}
-h2{font-size:16px;margin:0 0 14px}
-.task{display:flex;align-items:center;gap:10px;border-top:1px solid #eee;padding:13px 0}
-.task input{width:20px;height:20px;margin:0}
-.task-info{flex:1;min-width:0}
-.task-name{font-size:14px}
-.done{text-decoration:line-through;color:#aaa}
-.task-meta{font-size:11px;color:#999;margin-top:5px}
-.delete{background:transparent;color:#aaa;padding:7px}
-.primary{width:100%}
-.muted{font-size:12px;color:#999;line-height:1.7}
-.empty{text-align:center;color:#aaa;padding:20px 0;font-size:13px}
-.status{font-size:12px;color:#858474;margin-top:10px}
-footer{text-align:center;font-size:10px;color:#aaa;padding:20px}
-#appContent{display:none}
-#loginPage{display:none}
+main{padding:16px 14px 28px}
+#loginPage{display:none;max-width:440px;margin:42px auto}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:15px;padding:17px;margin-bottom:13px}
+h2{font-size:16px;margin:0 0 13px}
+h3{font-size:14px;margin:0 0 9px}
+.eyebrow{font-size:10px;letter-spacing:2px;color:var(--muted)}
+.count{font-size:39px;font-weight:700;margin:5px 0}
+.count small{font-size:14px;font-weight:400}
+.date,.muted{font-size:12px;color:var(--muted);line-height:1.7}
+.progress-track{height:8px;border-radius:20px;background:#eeece5;overflow:hidden;margin:10px 0 5px}
+.progress-fill{height:100%;background:var(--green);width:0%;border-radius:20px;transition:width .2s}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:#faf9f6;border:1px solid var(--line);border-radius:11px;padding:12px 9px}
+.stat strong{display:block;font-size:22px}
+.stat span{font-size:11px;color:var(--muted)}
+nav{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:3px 0 14px}
+nav button{background:#eae7df;color:#666;padding:11px 3px;font-size:12px}
+nav button.active{background:var(--green);color:white}
+.page[hidden]{display:none!important}
+label{display:block;font-size:12px;color:#777;margin:9px 0 4px}
+input,select,textarea{width:100%;padding:11px;border:1px solid #ddd8ce;border-radius:9px;background:white;color:var(--ink);font-size:14px;margin:4px 0 7px}
+textarea{min-height:76px;resize:vertical}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.primary{width:100%;margin-top:8px}
+.secondary{background:var(--sand);color:#555}
+.danger{background:#f7eeeb;color:var(--red)}
+.task-card{border-top:1px solid var(--line);padding:13px 0}
+.task-card:first-child{border-top:0}
+.task-head{display:flex;align-items:flex-start;gap:9px}
+.task-main{flex:1;min-width:0}
+.task-title{font-size:14px;font-weight:600;overflow-wrap:anywhere}
+.task-meta{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.6}
+.task-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.small-btn{padding:7px 10px;font-size:11px;background:var(--sand);color:#555}
+.small-btn.green{background:var(--green-soft);color:var(--green)}
+.small-btn.red{background:#f7eeeb;color:var(--red)}
+.pill{display:inline-block;padding:3px 7px;border-radius:20px;font-size:10px;margin-right:4px;background:var(--sand);color:#6d6a5e}
+.pill.high{background:#f7e9e5;color:#a65c50}
+.pill.medium{background:#f4efdf;color:#94763d}
+.pill.low{background:#edf0e8;color:#667052}
+.done-title{text-decoration:line-through;color:#999}
+.empty{text-align:center;color:#aaa;padding:20px 0;font-size:12px}
+.filter-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+.filter-row select{width:auto;min-width:110px;flex:1}
+.calendar-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.calendar-head strong{font-size:16px}
+.calendar-head button{padding:7px 12px;background:var(--sand);color:#555}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.weekday{text-align:center;font-size:10px;color:var(--muted);padding:5px 0}
+.day{min-height:62px;background:#faf9f6;border:1px solid var(--line);border-radius:8px;padding:5px 3px;text-align:left;color:var(--ink);font-size:11px}
+.day.muted-day{opacity:.35}
+.day.today{border:1.5px solid var(--green)}
+.day.selected{background:var(--green-soft);border:1.5px solid var(--green)}
+.day .dot{display:block;width:5px;height:5px;border-radius:50%;background:var(--green);margin:4px auto 0}
+.day .day-count{display:block;text-align:center;font-size:9px;color:var(--muted)}
+.selected-date{font-size:12px;color:var(--muted);margin-bottom:8px}
+.status{font-size:11px;color:var(--muted);text-align:center;padding:10px}
+footer{text-align:center;font-size:10px;color:#aaa;padding:16px}
+.modal-backdrop{position:fixed;inset:0;background:#0006;display:none;align-items:flex-end;justify-content:center;padding:12px;z-index:10}
+.modal-backdrop.open{display:flex}
+.modal{background:var(--bg);width:100%;max-width:620px;max-height:90vh;overflow:auto;border-radius:18px;padding:17px}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.modal-head button{background:transparent;color:#777;padding:5px 9px}
+@media(min-width:600px){.modal-backdrop{align-items:center}.day{min-height:76px;padding:7px}}
 </style>
 </head>
-
 <body>
-
 <header id="appHeader">
- <div class="brand">CHORUJARO COFFEE</div>
- <h1>開業準備ノート</h1>
- <div class="sub">ふたりでつくる、お店のこれから。</div>
- <button onclick="logout()" style="float:right">ログアウト</button>
+ <div class="header-inner">
+  <div class="header-top">
+   <div class="brand">CHORUJARO COFFEE</div>
+   <button class="logout" onclick="logout()">ログアウト</button>
+  </div>
+  <h1>開業準備ノート</h1>
+  <div class="sub">ふたりでつくる、お店のこれから。</div>
+ </div>
 </header>
 
 <main>
-
-<!-- ログイン画面 -->
-<section class="panel" id="loginPage">
- <h2>CHORUJARO COFFEE</h2>
- <p class="muted">夫婦でログインしてください。</p>
-
- <label>メールアドレス</label>
- <input type="email" id="loginEmail" placeholder="メールアドレス">
-
- <label>パスワード</label>
- <input type="password" id="loginPassword" placeholder="パスワード">
-
- <button class="primary" id="loginButton" onclick="login()">ログイン</button>
- <p id="loginMessage" class="muted"></p>
-</section>
-
-<!-- ログイン後のアプリ -->
-<div id="appContent">
-
- <section class="panel">
-  <div class="eyebrow">GRAND OPENING</div>
-  <div class="count"><span id="days">---</span><small> 日</small></div>
-  <div class="date">OPEN予定日：2027年3月21日</div>
+ <section class="panel" id="loginPage">
+  <div class="brand">CHORUJARO COFFEE</div>
+  <h2 style="margin-top:12px">開業準備ノート</h2>
+  <p class="muted">夫婦でログインしてください。</p>
+  <label for="loginEmail">メールアドレス</label>
+  <input type="email" id="loginEmail" autocomplete="username" placeholder="メールアドレス">
+  <label for="loginPassword">パスワード</label>
+  <input type="password" id="loginPassword" autocomplete="current-password" placeholder="パスワード">
+  <button class="primary" id="loginButton" onclick="login()">ログイン</button>
+  <p id="loginMessage" class="muted" aria-live="polite"></p>
  </section>
 
- <nav>
-  <button class="active" id="homeTab" onclick="showPage('home')">ホーム</button>
-  <button id="taskTab" onclick="showPage('tasks')">タスク</button>
- </nav>
+ <div id="appContent" style="display:none">
+  <section class="panel">
+   <div class="eyebrow">GRAND OPENING</div>
+   <div class="count"><span id="days">---</span><small> 日</small></div>
+   <div class="date">OPEN予定日：2027年3月21日</div>
+  </section>
 
- <section id="homePage">
-  <div class="panel">
-   <h2>これから取り組むこと</h2>
-   <div id="homeTasks" class="muted">読み込み中...</div>
-  </div>
+  <nav>
+   <button id="homeTab" class="active" onclick="showPage('home')">ホーム</button>
+   <button id="tasksTab" onclick="showPage('tasks')">タスク</button>
+   <button id="calendarTab" onclick="showPage('calendar')">カレンダー</button>
+   <button id="historyTab" onclick="showPage('history')">履歴</button>
+  </nav>
 
-  <div class="panel">
-   <h2>準備の進み具合</h2>
-   <div id="progress">読み込み中...</div>
-  </div>
- </section>
+  <section class="page" id="homePage">
+   <div class="panel">
+    <h2>準備の進み具合</h2>
+    <div class="stats">
+     <div class="stat"><strong id="totalCount">0</strong><span>すべて</span></div>
+     <div class="stat"><strong id="openCount">0</strong><span>未完了</span></div>
+     <div class="stat"><strong id="doneCount">0</strong><span>完了</span></div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="muted" id="progressText">0% 完了</div>
+   </div>
+   <div class="panel">
+    <h2>期限が近いタスク</h2>
+    <div id="upcomingTasks"></div>
+   </div>
+   <div class="panel">
+    <h2>優先度の高いタスク</h2>
+    <div id="priorityTasks"></div>
+   </div>
+  </section>
 
- <section id="tasksPage" hidden>
-  <div class="panel">
-   <h2>新しいタスクを追加</h2>
+  <section class="page" id="tasksPage" hidden>
+   <div class="panel">
+    <h2 id="formTitle">新しいタスクを追加</h2>
+    <input type="hidden" id="editId">
+    <label for="taskName">タスク名</label>
+    <input id="taskName" placeholder="例：メニュー表を作成する" maxlength="120">
+    <div class="form-grid">
+     <div>
+      <label for="owner">担当者</label>
+      <select id="owner"><option>夫</option><option>妻</option><option>ふたり</option></select>
+     </div>
+     <div>
+      <label for="priority">優先順位</label>
+      <select id="priority"><option value="高">高</option><option value="中" selected>中</option><option value="低">低</option></select>
+     </div>
+     <div>
+      <label for="deadline">期限</label>
+      <input type="date" id="deadline">
+     </div>
+     <div>
+      <label for="category">分類</label>
+      <select id="category">
+       <option>店舗準備</option><option>商品・メニュー</option><option>手続き・届出</option><option>資金・経理</option><option>広報・集客</option><option>その他</option>
+      </select>
+     </div>
+    </div>
+    <label for="taskStatus">進捗状況</label>
+    <select id="taskStatus"><option value="未着手">未着手</option><option value="進行中">進行中</option><option value="完了">完了</option></select>
+    <label for="memo">メモ</label>
+    <textarea id="memo" placeholder="必要なことや共有事項を入力"></textarea>
+        <button class="primary" id="saveTaskButton" onclick="saveTask()">タスクを追加する</button>
+    <button class="secondary primary" id="cancelEditButton" style="display:none" onclick="resetForm()">編集をキャンセル</button>
+   </div>
+   <div class="panel">
+    <h2>タスク一覧</h2>
+    <div class="filter-row">
+     <select id="statusFilter" onchange="renderTasks()"><option value="all">すべての進捗</option><option value="未着手">未着手</option><option value="進行中">進行中</option><option value="完了">完了</option></select>
+     <select id="ownerFilter" onchange="renderTasks()"><option value="all">すべての担当者</option><option>夫</option><option>妻</option><option>ふたり</option></select>
+     <select id="sortFilter" onchange="renderTasks()"><option value="deadline">期限が近い順</option><option value="priority">優先順位順</option><option value="newest">新しい順</option></select>
+    </div>
+    <div id="taskList"></div>
+   </div>
+  </section>
 
-   <label>タスク名</label>
-   <input id="taskName" placeholder="例：メニュー表を作成する">
+  <section class="page" id="calendarPage" hidden>
+   <div class="panel">
+    <h2>予定カレンダー</h2>
+    <div class="calendar-head">
+     <button onclick="changeMonth(-1)">‹</button>
+     <strong id="monthLabel"></strong>
+     <button onclick="changeMonth(1)">›</button>
+    </div>
+    <div class="calendar-grid" id="calendarGrid"></div>
+   </div>
+   <div class="panel">
+    <h2>選択した日のタスク</h2>
+    <div class="selected-date" id="selectedDateLabel"></div>
+    <div id="selectedDayTasks"></div>
+   </div>
+  </section>
 
-   <label>担当者</label>
-   <select id="owner">
-    <option value="夫">夫</option>
-    <option value="妻">妻</option>
-    <option value="ふたり">ふたり</option>
-   </select>
+  <section class="page" id="historyPage" hidden>
+   <div class="panel">
+    <h2>完了したタスク</h2>
+    <p class="muted">ふたりで進めてきた準備の記録です。</p>
+    <div id="historyList"></div>
+   </div>
+  </section>
 
-   <label>期限</label>
-   <input type="date" id="deadline">
-
-   <label>分類</label>
-   <select id="category">
-    <option value="店舗準備">店舗準備</option>
-    <option value="商品・メニュー">商品・メニュー</option>
-    <option value="手続き・届出">手続き・届出</option>
-    <option value="資金・経理">資金・経理</option>
-    <option value="広報・集客">広報・集客</option>
-    <option value="その他">その他</option>
-   </select>
-
-   <button class="primary" id="addButton" onclick="addTask()">タスクを追加する</button>
-  </div>
-
-  <div class="panel">
-   <h2>タスク一覧</h2>
-   <div id="taskList" class="muted">読み込み中...</div>
-  </div>
- </section>
-
- <div class="status" id="connection">接続準備中...</div>
- <footer>CHORUJARO COFFEE</footer>
-
-</div>
+  <div class="status" id="connection">接続準備中...</div>
+  <footer>CHORUJARO COFFEE</footer>
+ </div>
 </main>
 
+<div class="modal-backdrop" id="detailModal" onclick="closeModal(event)">
+ <div class="modal">
+  <div class="modal-head"><h2>タスク詳細</h2><button onclick="closeModal()">閉じる ✕</button></div>
+  <div id="modalContent"></div>
+ </div>
+</div>
+
 <script>
-
-// ==================================
-// Firebase設定
-// ==================================
-
-// ★ここは以前取得した本物のFirebase設定値にしてください
 const firebaseConfig = {
   apiKey: "AIzaSyCpHFgmAp2W1lZTRuOOcpVb5GpCE-RL4Q0",
   authDomain: "chorujaro-dcafb.firebaseapp.com",
@@ -158,286 +239,236 @@ const firebaseConfig = {
   appId: "1:637443353480:web:6cae1d7240a6f8fab2283d"
 };
 
-let db;
-let auth;
-let tasks = [];
-let unsubscribeTasks = null;
+let db, auth, tasks = [], unsubscribeTasks = null;
+let calendarDate = new Date();
+let selectedDate = dateKey(new Date());
 
-// ==================================
-// 画面切り替え
-// ==================================
-
+function dateKey(d){
+ const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
+ return `${y}-${m}-${day}`;
+}
+function safeText(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function statusOf(t){return t.status || (t.done ? '完了' : '未着手');}
+function isDone(t){return statusOf(t)==='完了';}
+function priorityRank(p){return p==='高'?0:p==='中'?1:2;}
 function showPage(page){
- document.getElementById('homePage').hidden = page !== 'home';
- document.getElementById('tasksPage').hidden = page !== 'tasks';
-
- document.getElementById('homeTab').classList.toggle('active',page === 'home');
- document.getElementById('taskTab').classList.toggle('active',page === 'tasks');
-}
-
-// ==================================
-// ログイン
-// ==================================
-
-async function login(){
-
- const email = document.getElementById('loginEmail').value.trim();
- const password = document.getElementById('loginPassword').value;
- const message = document.getElementById('loginMessage');
- const button = document.getElementById('loginButton');
-
- if(!email || !password){
-  message.textContent = 'メールアドレスとパスワードを入力してください';
-  return;
- }
-
- button.disabled = true;
- message.textContent = 'ログインしています...';
-
- try{
-  await auth.signInWithEmailAndPassword(email,password);
-  message.textContent = 'ログインしました';
- }catch(error){
-  console.error(error);
-  message.textContent = 'ログインできませんでした。入力内容を確認してください。';
- }
-
- button.disabled = false;
-}
-
-// ==================================
-// ログアウト
-// ==================================
-
-async function logout(){
- try{
-  await auth.signOut();
- }catch(error){
-  alert('ログアウトできませんでした');
- }
-}
-
-// ==================================
-// オープンまでの日数
-// ==================================
-
-function updateDays(){
- const target = new Date('2027-03-21T00:00:00');
- const today = new Date();
- today.setHours(0,0,0,0);
-
- document.getElementById('days').textContent =
-  Math.ceil((target - today) / 86400000);
-}
-
-updateDays();
-
-// ==================================
-// HTML表示用の安全処理
-// ==================================
-
-function escapeHTML(value){
- return String(value || '').replace(/[&<>"']/g,c=>({
-  '&':'&amp;',
-  '<':'&lt;',
-  '>':'&gt;',
-  '"':'&quot;',
-  "'":'&#39;'
- }[c]));
-}
-
-// ==================================
-// タスク表示
-// ==================================
-
-function render(){
-
- const open = tasks.filter(t => !t.done);
- const completed = tasks.filter(t => t.done);
-
- document.getElementById('progress').textContent =
-  tasks.length
-   ? `完了 ${completed.length} / ${tasks.length} 件（${Math.round(completed.length/tasks.length*100)}%）`
-   : 'まずはタスクを登録してみましょう。';
-
- document.getElementById('homeTasks').innerHTML = open.length
-  ? open.slice(0,5).map(t=>`
-   <div class="task">
-    <div class="task-info">
-     <div class="task-name">${escapeHTML(t.name)}</div>
-     <div class="task-meta">${escapeHTML(t.owner)} ・ ${escapeHTML(t.deadline || '期限未設定')}</div>
-    </div>
-   </div>
-  `).join('')
-  : '<div class="empty">未完了のタスクはありません</div>';
-
- document.getElementById('taskList').innerHTML = tasks.length
-  ? tasks.map(t=>`
-   <div class="task">
-    <input type="checkbox" ${t.done ? 'checked' : ''}
-     onchange="toggleTask('${t.id}',this.checked)">
-
-    <div class="task-info">
-     <div class="task-name ${t.done ? 'done' : ''}">${escapeHTML(t.name)}</div>
-     <div class="task-meta">
-      ${escapeHTML(t.owner)} ・
-      ${escapeHTML(t.category)} ・
-      ${escapeHTML(t.deadline || '期限未設定')}
-     </div>
-    </div>
-
-    <button class="delete" onclick="deleteTask('${t.id}')">削除</button>
-   </div>
-  `).join('')
-  : '<div class="empty">タスクはまだありません</div>';
-}
-
-// ==================================
-// タスク追加
-// ==================================
-
-async function addTask(){
-
- const name = document.getElementById('taskName').value.trim();
-
- if(!name){
-  alert('タスク名を入力してください');
-  return;
- }
-
- const button = document.getElementById('addButton');
- button.disabled = true;
-
- try{
-  await db.collection('tasks').add({
-   name,
-   owner: document.getElementById('owner').value,
-   deadline: document.getElementById('deadline').value,
-   category: document.getElementById('category').value,
-   done: false,
-   createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
-
-  document.getElementById('taskName').value = '';
-  document.getElementById('deadline').value = '';
-
- }catch(error){
-  console.error(error);
-  alert('保存できませんでした。Firebaseの設定を確認してください。');
- }
-
- button.disabled = false;
-}
-
-// ==================================
-// タスク完了・未完了
-// ==================================
-
-async function toggleTask(id,done){
- try{
-  await db.collection('tasks').doc(id).update({done});
- }catch(error){
-  console.error(error);
-  alert('更新できませんでした');
- }
-}
-
-// ==================================
-// タスク削除
-// ==================================
-
-async function deleteTask(id){
-
- if(!confirm('このタスクを削除しますか？')) return;
-
- try{
-  await db.collection('tasks').doc(id).delete();
- }catch(error){
-  console.error(error);
-  alert('削除できませんでした');
- }
-}
-
-// ==================================
-// Firebase初期化・ログイン状態監視
-// ==================================
-
-try{
-
- firebase.initializeApp(firebaseConfig);
-
- auth = firebase.auth();
- db = firebase.firestore();
-
- auth.onAuthStateChanged(user => {
-
-  const loginPage = document.getElementById('loginPage');
-  const appContent = document.getElementById('appContent');
-  const header = document.getElementById('appHeader');
-  const connection = document.getElementById('connection');
-
-  if(user){
-
-   loginPage.style.display = 'none';
-   appContent.style.display = 'block';
-   header.style.display = 'block';
-
-   showPage('home');
-
-   connection.textContent = 'データベースに接続しています';
-
-   if(unsubscribeTasks){
-    unsubscribeTasks();
-    unsubscribeTasks = null;
-   }
-
-   unsubscribeTasks = db.collection('tasks')
-    .orderBy('createdAt','desc')
-    .onSnapshot(snapshot => {
-
-     tasks = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-     }));
-
-     render();
-     connection.textContent = 'データベースに接続しています';
-
-    },error => {
-
-     console.error(error);
-     connection.textContent = 'データベース接続エラー';
-
-    });
-
-  }else{
-
-   if(unsubscribeTasks){
-    unsubscribeTasks();
-    unsubscribeTasks = null;
-   }
-
-   tasks = [];
-   render();
-
-   loginPage.style.display = 'block';
-   appContent.style.display = 'none';
-   header.style.display = 'none';
-
-  }
-
+ const pages=['home','tasks','calendar','history'];
+ pages.forEach(p=>{
+  document.getElementById(p+'Page').hidden=p!==page;
+  document.getElementById(p+'Tab').classList.toggle('active',p===page);
  });
-
-}catch(error){
-
- console.error(error);
-
- document.getElementById('loginPage').style.display = 'block';
- document.getElementById('loginMessage').textContent =
-  'Firebase設定を確認してください。';
-
+ if(page==='home')renderHome();
+ if(page==='tasks')renderTasks();
+ if(page==='calendar')renderCalendar();
+ if(page==='history')renderHistory();
 }
-
+function updateDays(){
+ const target=new Date(2027,2,21),today=new Date();
+ today.setHours(0,0,0,0);
+ document.getElementById('days').textContent=Math.ceil((target-today)/86400000);
+}
+function taskPills(t){
+ const p=t.priority||'中';
+ const cls=p==='高'?'high':p==='低'?'low':'medium';
+ return `<span class="pill ${cls}">優先度 ${safeText(p)}</span><span class="pill">${safeText(statusOf(t))}</span>`;
+}
+function taskMeta(t){
+ return `${safeText(t.owner||'未設定')} ・ ${safeText(t.category||'その他')} ・ ${safeText(t.deadline||'期限未設定')}`;
+}
+function taskCard(t,showActions=true){
+ return `<div class="task-card">
+  <div class="task-head">
+   <div class="task-main">
+    <div class="task-title ${isDone(t)?'done-title':''}">${safeText(t.name)}</div>
+    <div style="margin-top:6px">${taskPills(t)}</div>
+    <div class="task-meta">${taskMeta(t)}</div>
+   </div>
+  </div>
+  ${showActions?`<div class="task-actions">
+   <button class="small-btn green" onclick="openDetails('${t.id}')">詳細</button>
+   ${!isDone(t)?`<button class="small-btn" onclick="quickStatus('${t.id}','進行中')">進行中</button><button class="small-btn green" onclick="quickStatus('${t.id}','完了')">完了</button>`:`<button class="small-btn" onclick="quickStatus('${t.id}','未着手')">未完了に戻す</button>`}
+   <button class="small-btn" onclick="startEdit('${t.id}')">編集</button>
+   <button class="small-btn red" onclick="deleteTask('${t.id}')">削除</button>
+  </div>`:''}
+ </div>`;
+}
+function renderHome(){
+ const total=tasks.length,done=tasks.filter(isDone).length,open=total-done;
+ const pct=total?Math.round(done/total*100):0;
+ document.getElementById('totalCount').textContent=total;
+ document.getElementById('openCount').textContent=open;
+ document.getElementById('doneCount').textContent=done;
+ document.getElementById('progressFill').style.width=pct+'%';
+ document.getElementById('progressText').textContent=pct+'% 完了';
+ const upcoming=tasks.filter(t=>!isDone(t)&&t.deadline).sort((a,b)=>a.deadline.localeCompare(b.deadline)).slice(0,5);
+ document.getElementById('upcomingTasks').innerHTML=upcoming.length?upcoming.map(t=>taskCard(t)).join(''):'<div class="empty">期限のある未完了タスクはありません</div>';
+ const high=tasks.filter(t=>!isDone(t)&&(t.priority||'中')==='高').slice(0,5);
+ document.getElementById('priorityTasks').innerHTML=high.length?high.map(t=>taskCard(t)).join(''):'<div class="empty">優先度「高」の未完了タスクはありません</div>';
+}
+function renderTasks(){
+ const sf=document.getElementById('statusFilter').value,of=document.getElementById('ownerFilter').value,sort=document.getElementById('sortFilter').value;
+ let list=tasks.filter(t=>(sf==='all'||statusOf(t)===sf)&&(of==='all'||(t.owner||'')===of));
+ if(sort==='priority')list.sort((a,b)=>priorityRank(a.priority||'中')-priorityRank(b.priority||'中'));
+ else if(sort==='newest')list.sort((a,b)=>timeOf(b.createdAt)-timeOf(a.createdAt));
+ else list.sort((a,b)=>(a.deadline||'9999-99-99').localeCompare(b.deadline||'9999-99-99'));
+ document.getElementById('taskList').innerHTML=list.length?list.map(t=>taskCard(t)).join(''):'<div class="empty">該当するタスクはありません</div>';
+}
+function timeOf(v){return v&&v.toDate?v.toDate().getTime():0;}
+function renderHistory(){
+ const list=tasks.filter(isDone).sort((a,b)=>timeOf(b.completedAt)-timeOf(a.completedAt));
+ document.getElementById('historyList').innerHTML=list.length?list.map(t=>taskCard(t,false)+`<div class="task-meta">完了記録：${t.completedAt&&t.completedAt.toDate?t.completedAt.toDate().toLocaleDateString('ja-JP'):'日付記録なし'}</div>`).join(''):'<div class="empty">完了したタスクはまだありません</div>';
+}
+function renderCalendar(){
+ const y=calendarDate.getFullYear(),m=calendarDate.getMonth();
+ document.getElementById('monthLabel').textContent=`${y}年 ${m+1}月`;
+ const first=new Date(y,m,1),start=new Date(y,m,1-first.getDay());
+ const weekdays=['日','月','火','水','木','金','土'];
+ let html=weekdays.map(w=>`<div class="weekday">${w}</div>`).join('');
+ for(let i=0;i<42;i++){
+  const d=new Date(start);d.setDate(start.getDate()+i);
+  const key=dateKey(d),dayTasks=tasks.filter(t=>t.deadline===key);
+  const cls=[d.getMonth()!==m?'muted-day':'',key===dateKey(new Date())?'today':'',key===selectedDate?'selected':''].join(' ');
+  html+=`<button class="day ${cls}" onclick="selectDate('${key}')">${d.getDate()}${dayTasks.length?`<span class="dot"></span><span class="day-count">${dayTasks.length}件</span>`:''}</button>`;
+ }
+ document.getElementById('calendarGrid').innerHTML=html;
+ renderSelectedDay();
+}
+function renderSelectedDay(){
+ document.getElementById('selectedDateLabel').textContent=selectedDate.replaceAll('-',' / ');
+ const list=tasks.filter(t=>t.deadline===selectedDate);
+ document.getElementById('selectedDayTasks').innerHTML=list.length?list.map(t=>taskCard(t)).join(''):'<div class="empty">この日のタスクはありません</div>';
+}
+function changeMonth(delta){calendarDate.setMonth(calendarDate.getMonth()+delta);renderCalendar();}
+function selectDate(key){selectedDate=key;renderCalendar();}
+function resetForm(){
+ document.getElementById('editId').value='';
+ document.getElementById('taskName').value='';
+ document.getElementById('owner').value='夫';
+ document.getElementById('priority').value='中';
+ document.getElementById('deadline').value='';
+ document.getElementById('category').value='店舗準備';
+ document.getElementById('taskStatus').value='未着手';
+ document.getElementById('memo').value='';
+ document.getElementById('formTitle').textContent='新しいタスクを追加';
+ document.getElementById('saveTaskButton').textContent='タスクを追加する';
+ document.getElementById('cancelEditButton').style.display='none';
+}
+function startEdit(id){
+ const t=tasks.find(x=>x.id===id);if(!t)return;
+ showPage('tasks');
+ document.getElementById('editId').value=id;
+ document.getElementById('taskName').value=t.name||'';
+ document.getElementById('owner').value=t.owner||'夫';
+ document.getElementById('priority').value=t.priority||'中';
+ document.getElementById('deadline').value=t.deadline||'';
+ document.getElementById('category').value=t.category||'その他';
+ document.getElementById('taskStatus').value=statusOf(t);
+ document.getElementById('memo').value=t.memo||'';
+  document.getElementById('formTitle').textContent='タスクを編集';
+ document.getElementById('saveTaskButton').textContent='変更を保存する';
+ document.getElementById('cancelEditButton').style.display='block';
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+async function saveTask(){
+ const name=document.getElementById('taskName').value.trim();
+ if(!name){alert('タスク名を入力してください');return;}
+ const id=document.getElementById('editId').value;
+ const status=document.getElementById('taskStatus').value;
+ const data={
+  name,
+  owner:document.getElementById('owner').value,
+  priority:document.getElementById('priority').value,
+  deadline:document.getElementById('deadline').value,
+  category:document.getElementById('category').value,
+  status,
+  done:status==='完了',
+  memo:document.getElementById('memo').value.trim(),
+  updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+ };
+ if(status==='完了')data.completedAt=firebase.firestore.FieldValue.serverTimestamp();
+ else data.completedAt=null;
+ try{
+  if(id){
+   await db.collection('tasks').doc(id).update(data);
+  }else{
+   data.createdAt=firebase.firestore.FieldValue.serverTimestamp();
+   await db.collection('tasks').add(data);
+  }
+  resetForm();
+  alert('保存しました');
+ }catch(e){
+  console.error(e);
+  alert('保存できませんでした。通信状況を確認してください。');
+ }
+}
+async function quickStatus(id,status){
+ const data={status,done:status==='完了',updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
+ data.completedAt=status==='完了'?firebase.firestore.FieldValue.serverTimestamp():null;
+ try{await db.collection('tasks').doc(id).update(data);}
+ catch(e){console.error(e);alert('更新できませんでした');}
+}
+async function deleteTask(id){
+ if(!confirm('このタスクを削除しますか？'))return;
+ try{await db.collection('tasks').doc(id).delete();}
+ catch(e){console.error(e);alert('削除できませんでした');}
+}
+function openDetails(id){
+ const t=tasks.find(x=>x.id===id);if(!t)return;
+ document.getElementById('modalContent').innerHTML=`
+  <h3>${safeText(t.name)}</h3>
+  <p>${taskPills(t)}</p>
+  <p class="task-meta">担当：${safeText(t.owner||'未設定')}</p>
+  <p class="task-meta">期限：${safeText(t.deadline||'未設定')}</p>
+  <p class="task-meta">分類：${safeText(t.category||'その他')}</p>
+  <p class="task-meta">メモ</p>
+  <p style="white-space:pre-wrap">${safeText(t.memo||'メモはありません')}</p>
+  <button class="primary" onclick="closeModal();startEdit('${t.id}')">編集する</button>`;
+ document.getElementById('detailModal').classList.add('open');
+}
+function closeModal(e){
+ if(e&&e.target.id!=='detailModal')return;
+ document.getElementById('detailModal').classList.remove('open');
+}
+async function login(){
+ const email=document.getElementById('loginEmail').value.trim(),password=document.getElementById('loginPassword').value;
+ const msg=document.getElementById('loginMessage'),btn=document.getElementById('loginButton');
+ if(!email||!password){msg.textContent='メールアドレスとパスワードを入力してください';return;}
+ btn.disabled=true;msg.textContent='ログインしています...';
+ try{await auth.signInWithEmailAndPassword(email,password);msg.textContent='ログインしました';}
+ catch(e){console.error(e);msg.textContent='ログインできませんでした。メールアドレスとパスワードを確認してください。';}
+ btn.disabled=false;
+}
+async function logout(){try{await auth.signOut();}catch(e){console.error(e);alert('ログアウトできませんでした');}}
+function setSignedIn(user){
+ const loginPage=document.getElementById('loginPage'),app=document.getElementById('appContent'),header=document.getElementById('appHeader');
+ if(user){
+  loginPage.style.display='none';app.style.display='block';header.style.display='block';
+  showPage('home');
+  if(unsubscribeTasks)unsubscribeTasks();
+  unsubscribeTasks=db.collection('tasks').onSnapshot(snapshot=>{
+   tasks=snapshot.docs.map(doc=>({id:doc.id,...doc.data()}));
+   tasks.sort((a,b)=>timeOf(b.createdAt)-timeOf(a.createdAt));
+   renderHome();renderTasks();renderCalendar();renderHistory();
+   document.getElementById('connection').textContent='データベースに接続しています';
+  },error=>{
+   console.error(error);
+   document.getElementById('connection').textContent='データベース接続エラー：Firestoreのルールを確認してください';
+  });
+ }else{
+  if(unsubscribeTasks){unsubscribeTasks();unsubscribeTasks=null;}
+  tasks=[];loginPage.style.display='block';app.style.display='none';header.style.display='none';
+ }
+}
+try{
+ firebase.initializeApp(firebaseConfig);
+ auth=firebase.auth();db=firebase.firestore();
+ auth.onAuthStateChanged(setSignedIn);
+}catch(e){
+ console.error(e);
+ document.getElementById('loginPage').style.display='block';
+ document.getElementById('loginMessage').textContent='Firebase設定を確認してください。';
+}
+updateDays();
 </script>
 </body>
 </html>
